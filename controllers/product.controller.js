@@ -19,7 +19,7 @@ exports.getAll = (request, response) => {
 };
 
 exports.getOne = (request, response) => {
-  const { id } = request.body;
+  const { id } = request.params;
 
   if (!id)
     return response.json({ status: false, message: "product id not found" });
