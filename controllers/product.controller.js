@@ -49,6 +49,7 @@ exports.create = (request, response) => {
     quantity,
     brandId,
     desc,
+    saleFinishDate,
   } = request.body;
 
   fs.readFile(dataFile, "utf-8", (readErr, data) => {
@@ -64,10 +65,11 @@ exports.create = (request, response) => {
       price,
       thumbImage,
       images,
-      salePercent,
       quantity,
       brandId,
       desc,
+      salePercent,
+      saleFinishDate,
       createdDate: Date.now(),
     };
 
