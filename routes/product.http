@@ -1,0 +1,41 @@
+###
+POST http://localhost:9000/api/product
+Content-Type: application/json
+x-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY0MjJiNGMyMmZiNGY3YTk0OTk5M2E2ZCIsImZpcnN0bmFtZSI6IlRlc3QiLCJsYXN0bmFtZSI6IlRlc3QiLCJwYXNzd29yZCI6IiQyYiQwNCRqQ3NwazYuaTB0cDBIeFJVcWt4dVlPaHEySWtJTmdrTE4wYmk3RENTeFFibHpaWU42dHJwVyIsImVtYWlsIjoib3l1a2EyQGdtYWlsLmNvbSIsImNyZWF0ZWRBdCI6IjIwMjMtMDMtMjhUMDk6MzQ6NTguNDM1WiIsInVwZGF0ZWRBdCI6IjIwMjMtMDMtMjhUMDk6MzQ6NTguNDM1WiIsIl9fdiI6MH0sImlhdCI6MTY3OTk5NjIwNCwiZXhwIjoxNjgyNTg4MjA0fQ.u0-T8EJz2GoDWQsZ54U1GsYB6eCqNoQTu799PXPHdCI
+
+{
+  
+  "categoryId":"641d11b815b932fc8fd23aaa",
+  "price":2300,
+  "productName":"Test 1",
+  "quantityInStock": 300,
+  "thumbImage":"",
+  "brandId":2,
+  "descriptions":"desc",
+  "salePercent": 0,
+  "saleFinishDate":"2022-12-09",
+  "images": ["test","test1","test3"]
+}
+
+###
+GET http://localhost:9000/api/product
+Content-Type: application/json
+x-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY0MjJiNGMyMmZiNGY3YTk0OTk5M2E2ZCIsImZpcnN0bmFtZSI6IlRlc3QiLCJsYXN0bmFtZSI6IlRlc3QiLCJwYXNzd29yZCI6IiQyYiQwNCRqQ3NwazYuaTB0cDBIeFJVcWt4dVlPaHEySWtJTmdrTE4wYmk3RENTeFFibHpaWU42dHJwVyIsImVtYWlsIjoib3l1a2EyQGdtYWlsLmNvbSIsImNyZWF0ZWRBdCI6IjIwMjMtMDMtMjhUMDk6MzQ6NTguNDM1WiIsInVwZGF0ZWRBdCI6IjIwMjMtMDMtMjhUMDk6MzQ6NTguNDM1WiIsIl9fdiI6MH0sImlhdCI6MTY3OTk5NjIwNCwiZXhwIjoxNjgyNTg4MjA0fQ.u0-T8EJz2GoDWQsZ54U1GsYB6eCqNoQTu799PXPHdCI
+
+
+
+###
+GET http://localhost:9000/api/product/10
+Content-Type: application/json
+
+###
+PUT http://localhost:9000/api/product/1
+Content-Type: application/json
+
+{
+  "productName":"Shoess"
+}
+
+###
+DELETE http://localhost:9000/api/product/1
+Content-Type: application/json

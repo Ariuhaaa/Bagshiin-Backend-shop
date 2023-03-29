@@ -1,120 +1,101 @@
 const fs = require("fs");
 const uuid = require("uuid");
 
-const dataFile = process.cwd() + "/data/category.json";
+const categoryModel = require("../models/category.model");
 //id, categoryName, icon
 
-exports.getAll = (request, response) => {
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
+exports.getAll = async (request, response) => {
+  try {
+    const result = await categoryModel.find({});
+    if (result.length > 0) {
+      return response.json({ status: true, result });
     }
-
-    const savedData = data ? JSON.parse(data) : [];
-
-    return response.json({ status: true, result: savedData });
-  });
+  } catch (err) {
+    return response.json({ status: false, message: err });
+  }
 };
 
-exports.getOne = (request, response) => {
-  const { id } = request.body;
+exports.getOne = async (request, response) => {
+  const { id } = request.params;
+
   if (!id)
     return response.json({ status: false, message: "category id not found" });
 
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
+  try {
+    const result = await categoryModel.findOne({ _id: id });
+
+    console.log(result);
+
+    if (result) {
+      return response.json({ status: true, result });
+    } else {
+      return response.json({ status: false, message: "category not found" });
     }
-
-    const savedData = JSON.parse(data);
-
-    return response.json({
-      status: true,
-      result: savedData.find((cateItem) => cateItem.id == id),
-    });
-  });
+  } catch (err) {
+    console.log(err);
+    return response.json({ status: false, message: err });
+  }
 };
 
-exports.create = (request, response) => {
+exports.create = async (request, response) => {
   const { categoryName } = request.body;
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
-    }
 
-    const parsedData = data ? JSON.parse(data) : [];
+  try {
+    const newObj = new categoryModel({ categoryName });
+    const result = newObj.save();
 
-    const newObj = { id: uuid.v4(), categoryName };
-
-    parsedData.push(newObj);
-
-    fs.writeFile(dataFile, JSON.stringify(parsedData), (writeErr) => {
-      if (writeErr) {
-        return response.json({ status: false, message: writeErr });
-      }
-
+    if (result) {
+      return response.json({ status: true, result, message: "Success" });
+    } else {
       return response.json({
-        status: true,
-        message: "Амжилттай нэмэгдлээ",
-        result: newObj,
+        status: false,
+        message: "Hadgalahad aldaa garlaa",
       });
-    });
-  });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-exports.update = (request, response) => {
+exports.update = async (request, response) => {
   const { id } = request.params;
   const { categoryName } = request.body;
 
   if (!id)
     return response.json({ status: false, message: "category id not found" });
 
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
-    }
-
-    const parsedData = data ? JSON.parse(data) : [];
-
-    const updateData = parsedData.map((cateObj) => {
-      if (cateObj.id == id) {
-        return { ...cateObj, categoryName };
-      } else {
-        return cateObj;
-      }
+  const result = await categoryModel.findByIdAndUpdate(
+    { _id: id },
+    { categoryName },
+    { new: true }
+  );
+  if (result) {
+    return response.json({ status: true, result, message: "Success" });
+  } else {
+    return response.json({
+      status: false,
+      message: "Hadgalahad aldaa garlaa",
     });
-
-    fs.writeFile(dataFile, JSON.stringify(updateData), (writeErr) => {
-      if (writeErr) {
-        return response.json({ status: false, message: writeErr });
-      }
-
-      return response.json({ status: true, message: "Амжилттай засагдлаа" });
-    });
-  });
+  }
 };
 
-exports.delete = (request, response) => {
+exports.delete = async (request, response) => {
   const { id } = request.params;
 
   if (!id)
     return response.json({ status: false, message: "category id not found" });
 
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
+  try {
+    const result = await categoryModel.deleteOne({ _id: id });
+    if (result.modifiedCount > 0) {
+      return response.json({ status: true, result, message: "Success" });
+    } else {
+      return response.json({
+        status: false,
+        message: "Hadgalahad aldaa garlaa",
+      });
     }
-
-    const parsedData = JSON.parse(data);
-
-    const deletedData = parsedData.filter((e) => e.id != id);
-
-    fs.writeFile(dataFile, JSON.stringify(deletedData), (writeErr) => {
-      if (writeErr) {
-        return response.json({ status: false, message: writeErr });
-      }
-
-      return response.json({ status: true, message: "Амжилттай устгалаа" });
-    });
-  });
+  } catch (err) {
+    return response.json({ status: false, message: err });
+  }
 };

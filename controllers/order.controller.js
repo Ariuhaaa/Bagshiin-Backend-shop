@@ -1,20 +1,16 @@
-const fs = require("fs");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
 const saltRounds = 3;
-const jwt = require("jsonwebtoken");
+const myKey = "1234!@#$";
 
-const userModel = require("../models/user.model");
-
-const dataFile = process.cwd() + "/data/user.json";
-//id, firstname, lastname, username, password, email, password, favoriteProducs: ["",""], mostViewProducts:["",""], lastLoginDate
+const orderModel = require("../models/order.model");
 
 exports.getAll = async (request, response) => {
   try {
-    const result = await userModel
-      .find({})
-      .populate("favoriteProducts")
-      .populate("mostViewProducts");
+    const result = await orderModel.find({}).populate("userId").populate({
+      path: "orderDetails.productId",
+      select: "productId currentPrice",
+    });
     if (result.length > 0) {
       return response.json({ status: true, result });
     }
@@ -30,10 +26,13 @@ exports.getOne = async (request, response) => {
     return response.json({ status: false, message: "user id not found" });
 
   try {
-    const result = await userModel
-      .findById({ _id: _id })
-      .populate("favoriteProducts")
-      .populate("mostViewProducts");
+    const result = await orderModel
+      .findById({ _id: id })
+      .populate("userId")
+      .populate({
+        path: "orderDetails.productId",
+        select: "productId currentPrice",
+      });
     if (result) {
       return response.json({ status: true, result });
     } else {
@@ -45,9 +44,25 @@ exports.getOne = async (request, response) => {
 };
 
 exports.create = async (request, response) => {
-  const newPassword = await bcrypt.hash(request.body.password, saltRounds);
-  const newObj = new userModel({ ...request.body, password: newPassword });
+  const {
+    userId,
+    orderNumber,
+    totalPrice,
+    orderPaymentStatus,
+    orderDetails,
+    isDeliveried,
+  } = request.body;
 
+  orderNumber = "AWEDEV";
+
+  const newObj = new orderModel({
+    userId,
+    orderNumber,
+    totalPrice,
+    orderPaymentStatus,
+    orderDetails,
+    isDeliveried,
+  });
   const result = newObj.save();
   if (result) {
     return response.json({ status: true, result, message: "Success" });
@@ -62,10 +77,10 @@ exports.create = async (request, response) => {
 exports.update = async (request, response) => {
   const { id } = request.params;
   if (!id)
-    return response.json({ status: false, message: "user id not found" });
+    return response.json({ status: false, message: "order id not found" });
 
   try {
-    const result = await userModel.updateOne({ _id: id }, request.body);
+    const result = await orderModel.updateOne({ _id: id }, request.body);
     if (result.modifiedCount > 0) {
       return response.json({ status: true, result, message: "Success" });
     } else {
@@ -83,10 +98,10 @@ exports.delete = async (request, response) => {
   const { id } = request.params;
 
   if (!id)
-    return response.json({ status: false, message: "user id not found" });
+    return response.json({ status: false, message: "ordwer id not found" });
 
   try {
-    const result = await userModel.updateOne({ _id: id }, request.body);
+    const result = await orderModel.updateOne({ _id: id }, request.body);
     if (result.modifiedCount > 0) {
       return response.json({ status: true, result, message: "Success" });
     } else {
@@ -97,33 +112,5 @@ exports.delete = async (request, response) => {
     }
   } catch (err) {
     return response.json({ status: false, message: err });
-  }
-};
-
-exports.login = async (request, response) => {
-  const { email, password } = request.body;
-
-  if (!email || !password)
-    return response.json({
-      status: false,
-      message: "medeellee buren buglunu uu",
-    });
-
-  const user = await userModel.findOne({ email });
-
-  if (user && (await bcrypt.compare(password, user.password))) {
-    const token = jwt.sign({ user: user }, process.env.TOKEN_SECRET_KEY, {
-      expiresIn: "30d",
-    });
-    response
-      .status(200)
-      .send({ status: true, data: user, message: "Success", token });
-    return;
-  } else {
-    response.status(400).send({
-      status: false,
-      message: "user oldsongui ee, nuuts ug taarahgui bna",
-    });
-    return;
   }
 };

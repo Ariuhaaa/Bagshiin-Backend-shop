@@ -1,41 +1,45 @@
 const fs = require("fs");
 const uuid = require("uuid");
 
-const dataFile = process.cwd() + "/data/product.json";
+const productModel = require("../models/product.model");
 // Id, product name, categoryId, price, thumbImage, images,
 // salePercent, quantity, brandId, desc, createdDate,
 // UpdateDate, CreatedUser, UpdatedUser
 
-exports.getAll = (request, response) => {
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
+exports.getAll = async (request, response) => {
+  try {
+    const result = await productModel
+      .find({})
+      .populate("favoriteProducts")
+      .populate("mostViewProducts");
+    if (result.length > 0) {
+      return response.json({ status: true, result });
     }
-
-    const savedData = data ? JSON.parse(data) : [];
-
-    return response.json({ status: true, result: savedData });
-  });
+  } catch (err) {
+    return response.json({ status: false, message: err });
+  }
 };
 
-exports.getOne = (request, response) => {
+exports.getOne = async (request, response) => {
   const { id } = request.params;
 
   if (!id)
     return response.json({ status: false, message: "product id not found" });
 
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
+  try {
+    const result = await productModel.findOne({ _id: id });
+
+    console.log(result);
+
+    if (result) {
+      return response.json({ status: true, result });
+    } else {
+      return response.json({ status: false, message: "category not found" });
     }
-
-    const savedData = data ? JSON.parse(data) : [];
-
-    return response.json({
-      status: true,
-      result: savedData.find((userItem) => userItem.id == id),
-    });
-  });
+  } catch (err) {
+    console.log(err);
+    return response.json({ status: false, message: err });
+  }
 };
 
 exports.create = (request, response) => {
@@ -52,41 +56,32 @@ exports.create = (request, response) => {
     saleFinishDate,
   } = request.body;
 
-  fs.readFile(dataFile, "utf-8", (readErr, data) => {
-    if (readErr) {
-      return response.json({ status: false, message: readErr });
-    }
-
-    const parsedData = data ? JSON.parse(data) : [];
-    const newObj = {
-      id: uuid.v4(),
+  try {
+    const newObj = new productModel({
       productName,
       categoryId,
       price,
       thumbImage,
       images,
+      salePercent,
       quantity,
       brandId,
       desc,
-      salePercent,
       saleFinishDate,
-      createdDate: Date.now(),
-    };
-
-    parsedData.push(newObj);
-
-    fs.writeFile(dataFile, JSON.stringify(parsedData), (writeErr) => {
-      if (writeErr) {
-        return response.json({ status: false, message: writeErr });
-      }
-
-      return response.json({
-        status: true,
-        message: "Амжилттай нэмэгдлээ.",
-        result: newObj,
-      });
     });
-  });
+    const result = newObj.save();
+
+    if (result) {
+      return response.json({ status: true, result, message: "Success" });
+    } else {
+      return response.json({
+        status: false,
+        message: "Hadgalahad aldaa garlaa",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exports.update = (request, response) => {
